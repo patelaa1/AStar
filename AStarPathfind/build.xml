@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AStarPathfind" xmlns="antlib:org.apache.tools.ant" xmlns:props="antlib:org.apache.ant.props" default="help">
+
+	<!-- ENVIRONMENT PROPERTIES -->
+	<property name="project.name" value="AStarPathfind" />
+	<property name="java.src.dir" value="${basedir}/src" />
+	<property name="classes.dir" value="${basedir}/classes" />
+	<property name="bin.dir" value="${basedir}/bin" />
+	<property name="dist.dir" value="${basedir}/dist" />
+	<property name="lib.dir" value="${dist.dir}" />
+	<property name="data.dir" value="${basedir}/data" />
+
+	<path id="project.classpath">
+		<pathelement location="${classes.dir}" />
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	
+    <target name="copy.files" depends="init">
+        <echo message="copying client source files"></echo>
+        <copy todir="${dist.dir}">
+            <fileset dir="${basedir}">
+                <include name="res/*.png"/>
+                <include name="data/**/*.txt"/>
+                <exclude name="classes/**"/>
+            </fileset>
+        </copy>
+	</target>
+	
+	<target name="help">
+		<echo>Tartgets:</echo>	
+		<echo> - help: displays this help</echo>
+		<echo> - clean: Clean output dirs, build, deployment and map solutions data.</echo>
+		<echo> - init: creates directoy structure</echo>
+		<echo> - compile: compiles all source</echo>
+		<echo> - build: builds jar file</echo>
+		<echo> - run-test: executes program with test map (test_map.txt)</echo>
+		<echo> - run: (ant -Dfile=[my-mapfile] run) - executes program with map specified by -Dfile=[] option</echo>
+	</target> 
+
+	<target name="init" description="Initialisation / preparation before compiliation can start.">
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${classes.dir}" />
+	</target>
+
+	<target name="clean" description="Clean output dirs, build, deployment and map solutions data.">
+        <delete dir="${dist.dir}" failonerror="false"/>
+		<delete>
+			<fileset dir="${data.dir}">
+				<include name="**/*_solution.txt" />
+			</fileset>
+		</delete>
+		<delete dir="${classes.dir}"  failonerror="false"/>
+		<delete dir="${bin.dir}"  failonerror="false"/>
+	</target>
+
+	<target name="compile" description="Compile main source tree java files into class files" depends="init">
+		<javac srcdir="${java.src.dir}" destdir="${classes.dir}" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}">
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="build" description="" depends="clean,compile,copy.files">
+		<jar destfile="${dist.dir}/${project.name}.jar" basedir="${classes.dir}" />
+	</target>
+
+	<target name="run-test" depends="build">
+		<java classname="code.patelaa.pathfind.game.Main" fork="true" dir="${dist.dir}">
+			<arg value="data\maps\test_map.txt" />
+			<classpath refid="project.classpath" />
+		</java>
+	</target>
+
+	
+	<target name="run" depends="build">
+		<java classname="code.patelaa.pathfind.game.Main" fork="true" dir="${dist.dir}">
+			<arg value="${file}" />
+			<classpath refid="project.classpath" />
+		</java>
+	</target>
+	
+</project>
